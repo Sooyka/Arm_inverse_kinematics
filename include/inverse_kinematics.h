@@ -42,11 +42,11 @@ public:
 
 class Arm
 {
-    std::vector<Joint> joints_;
-    std::vector<Segment> segments_;
+    std::vector<Joint> joints_;    //First joint (with index 0 in the vector) is the one closest to the ground
+    std::vector<Segment> segments_; //First segment (with index 0 in the vector) is the one closest to the ground
 
 public:
-    Matrix4f effector_position_and_orientation() const; // for a given Arm configuration gives element of SE(3) describing effectors
+    Matrix4f effector_coordinates() const; // for a given Arm configuration gives element of SE(3) describing effectors
                                                   //  reference frame position and orientation
     void set_arm_joints(const std::vector<Joint> &joints);
     const std::vector<Joint>& get_arm_joints() const;

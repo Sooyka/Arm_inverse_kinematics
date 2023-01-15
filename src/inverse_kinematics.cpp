@@ -45,30 +45,72 @@ const std::vector<Segment> &Arm::get_arm_segments() const
     return segments_;
 };
 
-Matrix4f Arm::effector_position_and_orientation() const
+Matrix4f Arm::effector_coordinates() const
 {
-    Matrix4f effector_position = Matrix4f::Identity();
+    Matrix4f effector_coordinates = Matrix4f::Identity();
     Joint joint;
     Segment segment;
-    for (const auto joint_and_segment : boost::combine(joints_, segments_))
+    int no_of_joints = get_arm_joints().size();
+    for (int i = no_of_joints - 1; i = 0; i--)
     {
-        joint = boost::get<0>(joint_and_segment);
-        segment = boost::get<1>(joint_and_segment);
+        // joint = boost::get<0>(joint_and_segment);
+        // segment = boost::get<1>(joint_and_segment);
 
-        effector_position = effector_position * segment.get_segment_coordinates();
-        effector_position = effector_position * joint.get_joint_coordinates();
+        joint = get_arm_joints()[i];
+        segment = get_arm_segments()[i];
+
+        effector_coordinates = effector_coordinates * segment.get_segment_coordinates();
+        effector_coordinates = effector_coordinates * joint.get_joint_coordinates();
     }
-    return effector_position;
+    return effector_coordinates;
 };
 
-Matrix4f Arm::get_nth_segment_coordinates(int n) const 
+Matrix4f Arm::get_nth_segment_coordinates(int n) const
 {
-    Matrix4f a = Matrix4f::Identity();
-    return a;
+    Matrix4f segment_coordinates = Matrix4f::Identity();
+    Joint joint;
+    Segment segment;
+
+    if (get_arm_segments().size() < n)
+    {
+        return effector_coordinates();
+    }
+    joint = get_arm_joints()[n-1];
+    segment_coordinates = segment_coordinates * joint.get_joint_coordinates();
+    for (int i = n - 2; i = 0; i--)
+    {
+        // joint = boost::get<0>(joint_and_segment);
+        // segment = boost::get<1>(joint_and_segment);
+
+        joint = get_arm_joints()[i];
+        segment = get_arm_segments()[i];
+        segment_coordinates = segment_coordinates * segment.get_segment_coordinates();
+        segment_coordinates = segment_coordinates * joint.get_joint_coordinates();
+        
+    }
+
+    return segment_coordinates;
 };
 
-Matrix4f Arm::get_nth_joint_coordinates(int n) const 
+Matrix4f Arm::get_nth_joint_coordinates(int n) const
 {
-    Matrix4f a = Matrix4f::Identity();
-    return a;
+    Matrix4f joint_coordinates = Matrix4f::Identity();
+    Joint joint;
+    Segment segment;
+    if (get_arm_joints().size() < n)
+    {
+        return effector_coordinates();
+    }
+    for (int i = n - 2; i = 0; i--)
+    {
+        // joint = boost::get<0>(joint_and_segment);
+        // segment = boost::get<1>(joint_and_segment);
+
+        joint = get_arm_joints()[i];
+        segment = get_arm_segments()[i];
+
+        joint_coordinates = joint_coordinates * segment.get_segment_coordinates();
+        joint_coordinates = joint_coordinates * joint.get_joint_coordinates();
+    }
+    return joint_coordinates;
 };
