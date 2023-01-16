@@ -21,7 +21,7 @@ set(SOURCES
 # Add an executable with the above sources
 add_executable(Arm_inverse_kinematics ${SOURCES})
 
-add_subdirectory(ArmVis)
+# add_subdirectory(ArmVis)
 
 target_link_libraries(Arm_inverse_kinematics PUBLIC spdlog::spdlog  Eigen3::Eigen)
 

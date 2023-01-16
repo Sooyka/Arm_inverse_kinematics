@@ -1,7 +1,7 @@
 #include "spdlog/spdlog.h"
 #include "inverse_kinematics.h"
 
-using namespace Eigen;    
+// using namespace ArmVis;
 
 int main(int argc, char *argv[])
 {
@@ -34,6 +34,39 @@ int main(int argc, char *argv[])
 
         // push it to visualisation
     }
+
+
+    // //Initialize visualization
+	// ArmVis viz;
+	// //Arguments are: window title, window width, window height, number of vertices per circle, radius of cylinder
+	// viz.Init("Arm Visualization", 1280, 720, 15, 0.1f);
+
+	// //Prepare transofrmation data
+	// std::vector<float> transform_data;
+	// generateMockData(transform_data);
+
+	// //Set data pointer
+	// viz.setUserPointer(&transform_data);
+
+	// //End position to by set by visualization gui
+	// ArmVis::vec3 end_pos;
+
+	// //Rendering loop
+	// while (!viz.WindowShouldClose())
+	// {
+	// 	//Render scene and process gui
+	// 	viz.OnUpdate();
+
+	// 	//Retrieve end pos from gui
+	// 	ArmVis::vec3 tmp = viz.getEndPos();
+
+	// 	//Do something if position changed
+	// 	if (tmp != end_pos)
+	// 	{
+	// 		end_pos = tmp;
+	// 		std::cout << end_pos.x << ", " << end_pos.y << ", " << end_pos.z << '\n';
+	// 	}
+	// }
 
     return 0;
 }
