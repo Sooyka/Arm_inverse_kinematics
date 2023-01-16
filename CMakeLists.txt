@@ -12,6 +12,8 @@ find_package(spdlog REQUIRED)
 
 # Create a sources variable with a link to all cpp files to compile
 set(SOURCES
+    src/arm.cpp
+    src/common.cpp
     src/inverse_kinematics.cpp
     src/main.cpp
 )

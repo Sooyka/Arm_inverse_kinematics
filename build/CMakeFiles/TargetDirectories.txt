@@ -1,3 +1,0 @@
-/home/bartosz/Kodzenie/Arm_inverse_kinematics/build/CMakeFiles/rebuild_cache.dir
-/home/bartosz/Kodzenie/Arm_inverse_kinematics/build/CMakeFiles/edit_cache.dir
-/home/bartosz/Kodzenie/Arm_inverse_kinematics/build/CMakeFiles/Arm_inverse_kinematics.dir

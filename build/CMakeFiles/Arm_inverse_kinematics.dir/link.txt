@@ -1,1 +1,0 @@
-/usr/bin/clang++ -g CMakeFiles/Arm_inverse_kinematics.dir/src/inverse_kinematics.cpp.o CMakeFiles/Arm_inverse_kinematics.dir/src/main.cpp.o -o Arm_inverse_kinematics  /usr/lib/x86_64-linux-gnu/libspdlog.so.1.8.1 -lpthread /usr/lib/x86_64-linux-gnu/libfmt.so.7.1.3 -Wl,--as-needed 

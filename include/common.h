@@ -8,5 +8,18 @@
 // #include "boost/tuple/tuple_io.hpp"
 // #include <tuple>
 
+using namespace Eigen;
+
+struct coordinates
+{
+    float x_r;
+    float y_r;
+    float z_r;
+    float x_t;
+    float y_t;
+    float z_t;
+};
+
+Matrix4f exponential_coordinates_to_se3(const coordinates&);
 
 #endif
