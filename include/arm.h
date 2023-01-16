@@ -5,7 +5,9 @@
 
 enum JointType
 {
-    Revolut,
+    Revolut_pitch,
+    Revolut_yawn,
+    Revolut_roll,
     Spherical,
     Prismatic,
 };
@@ -42,6 +44,8 @@ public:
     Matrix4f get_nth_segment_frame(int n) const;
     Matrix4f get_nth_joint_frame(int n) const;
     void set_joints(const std::vector<Joint> &joints);
+    int no_of_DoF() const;
+    void bend_joints(const std::vector<float>&);
     const std::vector<Joint> &get_joints() const;
     void set_segments(const std::vector<Segment> &segments);
     const std::vector<Segment> &get_segments() const;

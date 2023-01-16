@@ -64,3 +64,12 @@ Matrix3f exponential_coordinates_to_SO3(float x_r, float y_r, float z_r) // calc
 
     return SO3_matrix;
 }
+
+Coordinates SE3_to_exponential_coordinates(const Matrix4f &){
+
+}
+
+
+Vector3f SO3_to_exponential_coordinates(const Matrix4f &){
+    
+}

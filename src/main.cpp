@@ -20,7 +20,14 @@ int main(int argc, char *argv[])
 	std::vector<Coordinates> segments_coordinates;
 	Coordinates coordinates; 
 	// coordinates = {1,2,4,3,2,2};
-
+	
+	// How to add joints and segments:
+	// Coordinates are exponential coordinates on se(3) representing how the given joint will bend or how long will be given segment
+	// Rotations are normalized to -pi, pi. 
+	// First three coordinates are for rotations and should be used only in joints.
+	// For now. its up to the user to provide rotations that make sense regarding the joint type.
+	// Second three of coordinates are for translations and should be used only for segments.
+	// To properly integrate with visualisation segment length should be written as 5th coordinate.
 	coordinates = {-0.1*M_PI,0,0,0,0,0};
 	joints_coordinates.push_back(coordinates);
 	coordinates = {0,0,0,0,0.5,0};
@@ -40,7 +47,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < no_of_joints; i++)
 	{	
 		joint.set_coordinates(joints_coordinates[i]); 
-		joint.set_type(Revolut);
+		joint.set_type(Revolut_pitch);
 		joints.push_back(joint); 
 		segment.set_coordinates(segments_coordinates[i]); 
 		segments.push_back(segment);

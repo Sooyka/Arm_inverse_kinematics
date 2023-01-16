@@ -112,6 +112,48 @@ Matrix4f Arm::get_nth_joint_frame(int n) const
     return joint_frame;
 };
 
-void Arm::inverse_kinematics(Coordinates coordinates){
+int Arm::no_of_DoF() const
+{
+    std::vector<Joint> Joints = get_joints();
+    Joint joint;
+    int no_of_DoF = 0;
+    int no_of_joints = Joints.size();
+    for (int i = 0; i < no_of_joints; i++)
+    {
+        joint = Joints[i];
+        switch (joint.get_type())
+        {
+        case Revolut_pitch:
+            no_of_DoF += 1;
+            break;
+        case Revolut_yawn:
+            no_of_DoF += 1;
+            break;
+        case Revolut_roll:
+            no_of_DoF += 1;
+            break;
+        case Spherical:
+            no_of_DoF += 3;
+            break;
+        case Prismatic:
+            no_of_DoF += 1;
+            break;
+        default:
+            no_of_DoF += 0;
+        }
+    }
+    return no_of_DoF;
+};
+void Arm::bend_joints(const std::vector<float> &)
+{
+}
 
+void Arm::inverse_kinematics(Coordinates coordinates)
+{
+    const Matrix4f target_frame = exponential_coordinates_to_SE3(coordinates);
+    Matrix4f current_frame = effector_frame();
+    // log
+    int no_of_DoF = Arm::no_of_DoF();
+    Matrix<float, 6, Dynamic> Jacobian;
+    
 };
