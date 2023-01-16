@@ -1,0 +1,3 @@
+[submodule "ArmVis"]
+	path = ArmVis
+	url = git@github.com:Langwedocjusz/ArmVis.git
