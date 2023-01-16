@@ -16,7 +16,7 @@ After this it might be necceseary to run:
 
 How to add joints and segments to an arm:
 
-Coordinates are exponential coordinates on se(3) representing how the given joint will bend or how long will be given segment
+Coordinates are exponential coordinates on se(3) representing how the given joint will bend or how long will be given segment.
 
 Rotations are normalized to -pi, pi. 
 
