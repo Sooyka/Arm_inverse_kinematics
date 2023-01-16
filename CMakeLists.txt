@@ -14,6 +14,7 @@ find_package(spdlog REQUIRED)
 set(SOURCES
     src/arm.cpp
     src/common.cpp
+    src/vis_interface.cpp
     src/inverse_kinematics.cpp
     src/main.cpp
 )
@@ -21,9 +22,9 @@ set(SOURCES
 # Add an executable with the above sources
 add_executable(Arm_inverse_kinematics ${SOURCES})
 
-# add_subdirectory(ArmVis)
+add_subdirectory(ArmVis)
 
-target_link_libraries(Arm_inverse_kinematics PUBLIC spdlog::spdlog  Eigen3::Eigen)
+target_link_libraries(Arm_inverse_kinematics PUBLIC spdlog::spdlog  Eigen3::Eigen ArmVis)
 
 # include_directories(${SPDLOG_INCLUDE_DIR})
 

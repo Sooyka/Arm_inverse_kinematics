@@ -10,7 +10,7 @@
 
 using namespace Eigen;
 
-struct coordinates
+struct Coordinates
 {
     float x_r;
     float y_r;
@@ -20,6 +20,6 @@ struct coordinates
     float z_t;
 };
 
-Matrix4f exponential_coordinates_to_se3(const coordinates&);
+Matrix4f exponential_coordinates_to_se3(const Coordinates&);
 
 #endif
