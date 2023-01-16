@@ -1,101 +1,117 @@
 #include "arm.h"
 
-void Joint::set_joint_coordinates(const Coordinates &coordinates)
+void Joint::set_coordinates(const Coordinates &coordinates)
 {
     coordinates_ = coordinates;
 };
-const Coordinates &Joint::get_joint_coordinates() const
+const Coordinates &Joint::get_coordinates() const
 {
     return coordinates_;
 };
 
-void Segment::set_segment_coordinates(const Coordinates &coordinates)
+void Joint::set_type(const JointType &joint_type)
+{
+    type_ = joint_type;
+}
+
+const JointType &Joint::get_type() const
+{
+    return type_;
+}
+
+void Segment::set_coordinates(const Coordinates &coordinates)
 {
     coordinates_ = coordinates;
 };
-const Coordinates &Segment::get_segment_coordinates() const
+const Coordinates &Segment::get_coordinates() const
 {
     return coordinates_;
 };
 
-void Arm::set_arm_joints(const std::vector<Joint> &joints)
+void Arm::set_joints(const std::vector<Joint> &joints)
 {
     joints_ = joints;
 };
-const std::vector<Joint> &Arm::get_arm_joints() const
+const std::vector<Joint> &Arm::get_joints() const
 {
     return joints_;
 };
 
-void Arm::set_arm_segments(const std::vector<Segment> &segments)
+void Arm::set_segments(const std::vector<Segment> &segments)
 {
     segments_ = segments;
 };
-const std::vector<Segment> &Arm::get_arm_segments() const
+const std::vector<Segment> &Arm::get_segments() const
 {
     return segments_;
 };
 
-Coordinates Arm::effector_coordinates() const
+Matrix4f Arm::effector_frame() const
 {
-    Matrix4f effector_matix = Matrix4f::Identity();
-    Coordinates effector_coordinates;
+    Matrix4f effector_frame = Matrix4f::Identity();
+    std::vector<Joint> joints = get_joints();
+    std::vector<Segment> segments = get_segments();
     Joint joint;
     Segment segment;
-    int no_of_joints = get_arm_joints().size();
-    for (int i = no_of_joints - 1; i == 0; i--)
+    int no_of_joints = joints.size();
+    for (int i = no_of_joints - 1; i >= 0; i--)
     {
-        joint = get_arm_joints()[i];
-        segment = get_arm_segments()[i];
+        joint = joints[i];
+        segment = segments[i];
 
-        effector_matrix = effector_coordinates * segment.get_segment_coordinates();
-        effector_matrix = effector_coordinates * joint.get_joint_coordinates();
+        effector_frame = exponential_coordinates_to_SE3(segment.get_coordinates()) * effector_frame;
+        effector_frame = exponential_coordinates_to_SE3(joint.get_coordinates()) * effector_frame;
     }
-    return effector_coordinates;
+    return effector_frame;
 };
 
-Coordinates Arm::get_nth_segment_coordinates(int n) const
+Matrix4f Arm::get_nth_segment_frame(int n) const
 {
-    Matrix4f segment_matrix = Matrix4f::Identity();
-    Coordinates segment_coordinates;
+    Matrix4f segment_frame = Matrix4f::Identity();
+    std::vector<Joint> joints = get_joints();
+    std::vector<Segment> segments = get_segments();
     Joint joint;
     Segment segment;
 
-    if (get_arm_segments().size() < n)
+    if (segments.size() < n)
     {
-        return effector_coordinates();
+        return effector_frame();
     }
-    joint = get_arm_joints()[n-1];
-    segment_coordinates = segment_coordinates * joint.get_joint_coordinates();
-    for (int i = n - 2; i == 0; i--)
+    joint = joints[n - 1];
+    segment_frame = segment_frame * exponential_coordinates_to_SE3(joint.get_coordinates());
+    for (int i = n - 2; i >= 0; i--)
     {
-        joint = get_arm_joints()[i];
-        segment = get_arm_segments()[i];
-        segment_matrix = segment_matrix * segment.get_segment_coordinates();
-        segment_matrix = segment_matrix * joint.get_joint_coordinates();
-        
+        joint = joints[i];
+        segment = segments[i];
+        segment_frame = exponential_coordinates_to_SE3(segment.get_coordinates()) * segment_frame;
+        segment_frame = exponential_coordinates_to_SE3(joint.get_coordinates()) * segment_frame;
     }
 
-    return segment_coordinates;
+    return segment_frame;
 };
 
-Coordinates Arm::get_nth_joint_coordinates(int n) const
+Matrix4f Arm::get_nth_joint_frame(int n) const
 {
-    Matrix4f joint_matrix = Matrix4f::Identity();
-    Coordinates joint_coordinates;
+    Matrix4f joint_frame = Matrix4f::Identity();
+    std::vector<Joint> joints = get_joints();
+    std::vector<Segment> segments = get_segments();
     Joint joint;
     Segment segment;
-    if (get_arm_joints().size() < n)
+    if (joints.size() < n)
     {
-        return effector_coordinates();
+        return effector_frame();
     }
-    for (int i = n - 2; i == 0; i--)
+    for (int i = n - 2; i >= 0; i--)
     {
-        joint = get_arm_joints()[i];
-        segment = get_arm_segments()[i];
+        joint = joints[i];
+        segment = segments[i];
 
-        joint_matrix = joint_matrix * segment.get_segment_coordinates();
-        joint_matrix = joint_matrix * joint.get_joint_coordinates();
+        joint_frame = exponential_coordinates_to_SE3(segment.get_coordinates()) * joint_frame;
+        joint_frame = exponential_coordinates_to_SE3(joint.get_coordinates()) * joint_frame;
     }
-    return joint_coordinates;
+    return joint_frame;
+};
+
+void Arm::inverse_kinematics(Coordinates coordinates){
+
 };
