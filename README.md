@@ -15,11 +15,17 @@ After this it might be necceseary to run:
 ## Usage
 
 How to add joints and segments to an arm:
+
 Coordinates are exponential coordinates on se(3) representing how the given joint will bend or how long will be given segment
+
 Rotations are normalized to -pi, pi. 
+
 First three coordinates are for rotations and should be used only in joints.
+
 For now. its up to the user to provide rotations that make sense regarding the joint type.
+
 Second three of coordinates are for translations and should be used only for segments.
+
 To properly integrate with visualisation segment length should be written as 5th coordinate.
 
 ## Binaries
