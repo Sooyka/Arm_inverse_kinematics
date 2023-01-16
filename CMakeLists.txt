@@ -21,6 +21,8 @@ set(SOURCES
 # Add an executable with the above sources
 add_executable(Arm_inverse_kinematics ${SOURCES})
 
+add_subdirectory(ArmVis)
+
 target_link_libraries(Arm_inverse_kinematics PUBLIC spdlog::spdlog  Eigen3::Eigen)
 
 # include_directories(${SPDLOG_INCLUDE_DIR})
@@ -37,3 +39,4 @@ include_directories(${EIGEN_INCLUDE_DIR} ${SPDLOG_INCLUDE_DIR} ${PROJECT_SOURCE_
 #     PRIVATE 
 #         ${PROJECT_SOURCE_DIR}/include
 # )
+
