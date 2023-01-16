@@ -1,6 +1,6 @@
 # Arm_inverse_kinematics
-A simple inverse kinematics model of the robotic arm. Supports arbitrary number of joints of revolut, spherical or prismatic types.
-For now only forward kinematics is implemented, but project should be completed soon (estimated to 18.01.2023). 
+A simple numerical inverse kinematics model of the robotic arm with visualisation. Supports arbitrary number of joints of revolut, spherical or prismatic types.
+For now only forward kinematics is implemented, but project should be completed soon (estimated to 18.01.2023).  
 
 ## Cloning
 
