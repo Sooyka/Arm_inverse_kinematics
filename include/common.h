@@ -41,6 +41,6 @@ struct Bn_theta
     float theta;
 };
 
-Matrix4f Sn_to_bn(const Matrix4f& Sn, const Matrix4f& M);
+Matrix4f Sn_to_Bn(const Matrix4f& Sn, const Matrix4f& M);
 
 #endif

@@ -89,9 +89,9 @@ Coordinates SE3_to_exponential_coordinates(const Matrix4f &matrix)
 
     Vector3f rotation_coordinates = SO3_to_exponential_coordinates(R);
     float x_r, y_r, z_r;
-    x_r = rotation_coordinates(1);
-    y_r = rotation_coordinates(2);
-    z_r = rotation_coordinates(3);
+    x_r = rotation_coordinates(0);
+    y_r = rotation_coordinates(1);
+    z_r = rotation_coordinates(2);
 
     coordinates.x_r = x_r;
     coordinates.y_r = y_r;
@@ -137,9 +137,9 @@ Vector3f SO3_to_exponential_coordinates(const Matrix3f &R)
     Vector3f r_pi;
     if(trace_diff < epsilon)
     {   
-        r12 = R(1,2);
-        r22 = R(2,2);
-        r32 = R(3,2);
+        r12 = R(0,1);
+        r22 = R(1,1);
+        r32 = R(2,1);
         r_pi << r12, 1+r22, r32;
         coordinates = M_PI*1/(2*sqrt(1+r22))*r_pi;
         return coordinates;
@@ -158,7 +158,7 @@ Vector3f SO3_to_exponential_coordinates(const Matrix3f &R)
     return coordinates;
 }
 
-Matrix4f Sn_to_bn(const Matrix4f &Sn, const Matrix4f &M)
+Matrix4f Sn_to_Bn(const Matrix4f &Sn, const Matrix4f &M)
 {
     return M.inverse()*Sn*M;
 }

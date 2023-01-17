@@ -8,6 +8,13 @@ void generateMockData(std::vector<float> &transform_data);
 int main(int argc, char *argv[])
 {
 
+	// MatrixXf M;
+	// M.resize(2,3);
+	// M << 2,3,4,
+	// 	1,0,1;
+	// MatrixXf M_1 = M.completeOrthogonalDecomposition().pseudoInverse();
+	// std::cout<< M_1 << std::endl<<M_1*M<<std::endl<< M*M_1 <<std::endl;
+	// return 0;
 	// Manipulator
 	Arm arm;
 
@@ -17,6 +24,7 @@ int main(int argc, char *argv[])
 	Segment segment;
 	std::vector<Coordinates> joints_coordinates;
 	std::vector<Coordinates> segments_coordinates;
+	std::vector<JointType> joints_types;
 	Coordinates coordinates; 
 	// coordinates = {1,2,4,3,2,2};
 	coordinates = {0,0.5*M_PI,0,0,0,0};
@@ -29,26 +37,90 @@ int main(int argc, char *argv[])
 	// For now. its up to the user to provide rotations that make sense regarding the joint type.
 	// Second three of coordinates are for translations and should be used only for segments.
 	// To properly integrate with visualisation segment length should be written as 5th coordinate.
-	coordinates = {-0.1*M_PI,0,0,0,0,0};
+	// coordinates = {0,0.1*M_PI,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_roll);
+	// coordinates = {0,0,0,0,0.1,0};
+	// segments_coordinates.push_back(coordinates);
+
+	// coordinates = {0,0.1*M_PI,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_roll);
+	// coordinates = {0,0,0,0,0.1,0};
+	// segments_coordinates.push_back(coordinates);
+
+	// coordinates = {0.2*M_PI,0,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_pitch);
+	// coordinates = {0,0,0,0,0.5,0};
+	// segments_coordinates.push_back(coordinates);
+
+	// coordinates = {0.3*M_PI,0,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_pitch);
+	// coordinates = {0,0,0,0,0.2,0};
+	// segments_coordinates.push_back(coordinates);
+
+	// coordinates = {0,0.2*M_PI,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_roll);
+	// coordinates = {0,0,0,0,0.2,0};
+	// segments_coordinates.push_back(coordinates);
+
+	// coordinates = {0.45*M_PI,0,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_pitch);
+	// coordinates = {0,0,0,0,0.2,0};
+	// segments_coordinates.push_back(coordinates);
+
+
+	coordinates = {0,0,0,0,0,0};
 	joints_coordinates.push_back(coordinates);
+	joints_types.push_back(Revolut_roll);
+	coordinates = {0,0,0,0,0.1,0};
+	segments_coordinates.push_back(coordinates);
+
+	coordinates = {0,0,0,0,0,0};
+	joints_coordinates.push_back(coordinates);
+	joints_types.push_back(Revolut_roll);
+	coordinates = {0,0,0,0,0.1,0};
+	segments_coordinates.push_back(coordinates);
+
+	coordinates = {0,0,0,0,0,0};
+	joints_coordinates.push_back(coordinates);
+	joints_types.push_back(Revolut_pitch);
 	coordinates = {0,0,0,0,0.5,0};
 	segments_coordinates.push_back(coordinates);
 
-	coordinates = {0.3*M_PI,0,0,0,0,0};
+	coordinates = {0.1*M_PI,0,0,0,0,0};
 	joints_coordinates.push_back(coordinates);
-	coordinates = {0,0,0,0,0.4,0};
+	joints_types.push_back(Revolut_pitch);
+	coordinates = {0,0,0,0,0.2,0};
 	segments_coordinates.push_back(coordinates);
 
-	coordinates = {0.45*M_PI,0,0,0,0,0};
+	coordinates = {0,0,0,0,0,0};
 	joints_coordinates.push_back(coordinates);
-	coordinates = {0,0,0,0,0.25,0};
+	joints_types.push_back(Revolut_roll);
+	coordinates = {0,0,0,0,0.2,0};
 	segments_coordinates.push_back(coordinates);
+
+	coordinates = {0,0,0,0,0,0};
+	joints_coordinates.push_back(coordinates);
+	joints_types.push_back(Revolut_pitch);
+	coordinates = {0,0,0,0,0.2,0};
+	segments_coordinates.push_back(coordinates);
+
+	// coordinates = {0,0.45*M_PI,0,0,0,0};
+	// joints_coordinates.push_back(coordinates);
+	// joints_types.push_back(Revolut_roll);
+	// coordinates = {0,0,0,0,0.25,0};
+	// segments_coordinates.push_back(coordinates);
 
 	int no_of_joints = joints_coordinates.size();
 	for (int i = 0; i < no_of_joints; i++)
 	{	
 		joint.set_coordinates(joints_coordinates[i]); 
-		joint.set_type(Revolut_pitch);
+		joint.set_type(joints_types[i]);
 		joints.push_back(joint); 
 		segment.set_coordinates(segments_coordinates[i]); 
 		segments.push_back(segment);
@@ -75,6 +147,10 @@ int main(int argc, char *argv[])
 	ArmVis::vec3 end_pos;
 	ArmVis::vec3 end_rot;
 	Coordinates effector_coordinates;
+
+	Matrix4f offset_frame = arm.effector_frame();
+
+	
 
 	// Rendering loop
 	while (!viz.WindowShouldClose())

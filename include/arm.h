@@ -57,6 +57,7 @@ public:
     void inverse_kinematics(Coordinates coordinates);
     std::vector<Sn_theta> get_Sn_theta() const; // Calculates screw matrices.
     int no_of_DoF() const;
+    Matrix<float, 6, Dynamic> get_jacobian()const;
     
 };
 
