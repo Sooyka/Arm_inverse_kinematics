@@ -1,7 +1,7 @@
 #ifndef __ARM_H__
 #define __ARM_H__
 
-#include "inverse_kinematics.h"
+#include "common.h"
 
 enum JointType
 {

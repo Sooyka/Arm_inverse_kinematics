@@ -1,5 +1,4 @@
 #include "spdlog/spdlog.h"
-#include "inverse_kinematics.h"
 #include "common.h"
 #include "ArmVis.h"
 #include "vis_interface.h"

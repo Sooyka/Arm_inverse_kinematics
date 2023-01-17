@@ -15,7 +15,6 @@ set(SOURCES
     src/arm.cpp
     src/common.cpp
     src/vis_interface.cpp
-    src/inverse_kinematics.cpp
     src/main.cpp
 )
 
