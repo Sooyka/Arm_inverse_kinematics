@@ -31,6 +31,7 @@ class Segment
 public:
     void set_coordinates(const Coordinates &coordinates);
     const Coordinates &get_coordinates() const;
+    float get_length() const; 
 };
 
 class Arm
@@ -43,14 +44,22 @@ public:
                                      //  reference frame position and orientation
     Matrix4f get_nth_segment_frame(int n) const;
     Matrix4f get_nth_joint_frame(int n) const;
+
     void set_joints(const std::vector<Joint> &joints);
-    int no_of_DoF() const;
-    void bend_joints(const std::vector<float>&);
     const std::vector<Joint> &get_joints() const;
+
     void set_segments(const std::vector<Segment> &segments);
     const std::vector<Segment> &get_segments() const;
 
+    void set_parameters(const std::vector<float>&); // Sets coordinates that serve as actual parameters.
+    std::vector<float> get_parameters() const; // Extracts number of coordinates equal to th number of DoF.d
+
     void inverse_kinematics(Coordinates coordinates);
+    std::vector<Sn_theta> get_Sn_theta() const; // Calculates screw matrices.
+    int no_of_DoF() const;
+    
 };
+
+
 
 #endif

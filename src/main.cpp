@@ -19,7 +19,9 @@ int main(int argc, char *argv[])
 	std::vector<Coordinates> segments_coordinates;
 	Coordinates coordinates; 
 	// coordinates = {1,2,4,3,2,2};
-	
+	coordinates = {0,0.5*M_PI,0,0,0,0};
+	// std::cout << exponential_coordinates_to_SE3(coordinates) << std::endl;
+	// return 0;
 	// How to add joints and segments:
 	// Coordinates are exponential coordinates on se(3) representing how the given joint will bend or how long will be given segment
 	// Rotations are normalized to -pi, pi. 

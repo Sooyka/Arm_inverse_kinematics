@@ -4,8 +4,8 @@ std::vector<float> arm_to_float_vector(const Arm &arm)
 {
     float scaling_parameter = 2;
     Matrix4f vis_scaling_matrix = Matrix4f::Identity();
-    vis_scaling_matrix(1,1) = scaling_parameter;
-    vis_scaling_matrix(3,3) = scaling_parameter;
+    vis_scaling_matrix(1, 1) = scaling_parameter;
+    vis_scaling_matrix(3, 3) = scaling_parameter;
     std::vector<float> arm_raw_coordinates;
     Matrix4f joint_segment_matrix = Matrix4f::Identity();
     std::vector<float> raw_matrix_float;
@@ -19,7 +19,7 @@ std::vector<float> arm_to_float_vector(const Arm &arm)
         joint = joints[0];
         segment = segments[0];
         joint_segment_matrix = joint_segment_matrix * exponential_coordinates_to_SE3(joint.get_coordinates());
-        raw_matrix_float = matrix_to_float_vector(joint_segment_matrix * segment_scaling_for_drawing(segment)*vis_scaling_matrix);
+        raw_matrix_float = matrix_to_float_vector(joint_segment_matrix * segment_scaling_for_drawing(segment) * vis_scaling_matrix);
         for (int j = 0; j < 16; j++)
         {
             arm_raw_coordinates.push_back(raw_matrix_float[j]);
@@ -32,12 +32,17 @@ std::vector<float> arm_to_float_vector(const Arm &arm)
 
         joint_segment_matrix = joint_segment_matrix * exponential_coordinates_to_SE3(segment.get_coordinates());
         joint_segment_matrix = joint_segment_matrix * exponential_coordinates_to_SE3(joint.get_coordinates());
-        raw_matrix_float = matrix_to_float_vector(joint_segment_matrix * segment_scaling_for_drawing(segments[i])*vis_scaling_matrix);
+        raw_matrix_float = matrix_to_float_vector(joint_segment_matrix * segment_scaling_for_drawing(segments[i]) * vis_scaling_matrix);
         for (int j = 0; j < 16; j++)
         {
             arm_raw_coordinates.push_back(raw_matrix_float[j]);
         }
     }
+    // raw_matrix_float = matrix_to_float_vector(arm.effector_frame());
+    // for (int j = 0; j < 16; j++)
+    // {
+    //     arm_raw_coordinates.push_back(raw_matrix_float[j]);
+    // }
     return arm_raw_coordinates;
 }
 
