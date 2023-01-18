@@ -267,7 +267,7 @@ void Arm::inverse_kinematics(const Matrix4d &target_frame)
     Jacobian.resize(6, no_of_DoF);
     parameters = get_parameters();
     int no_of_steps = 0;
-    const int max_no_of_steps = 10000;
+    const int max_no_of_steps = 100;
 
     double epsilon = 0.05;
     current_frame = effector_frame();
@@ -294,7 +294,8 @@ void Arm::inverse_kinematics(const Matrix4d &target_frame)
 
         // std::cout <<"Jacobian pseudoinverse:"<< std::endl<< Jacobian_pseudoinverse << std::endl << std::endl <<"Jacobian:" << std::endl << Jacobian << std::endl << std::endl << std::endl;
         double diff_norm;
-        diff_norm = parameters_delta_vect.norm();
+        // diff_norm = parameters_delta_vect.norm();
+        diff_norm = (effector_frame().inverse() * target_frame).norm();
         std::cout << diff_norm << std::endl;
         if (diff_norm < epsilon)
         {
