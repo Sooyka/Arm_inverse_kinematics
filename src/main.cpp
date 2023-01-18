@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	arm.set_segments(segments);
 std::vector<float> par ;
 
-arm.set_parameters{}
+// arm.set_parameters{}
 	return 0;
 	// Initialize visualization
 	ArmVis viz;
