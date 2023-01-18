@@ -19,36 +19,36 @@ using namespace Eigen;
 
 struct Coordinates
 {
-    float x_r;
-    float y_r;
-    float z_r;
-    float x_t;
-    float y_t;
-    float z_t;
+    double x_r;
+    double y_r;
+    double z_r;
+    double x_t;
+    double y_t;
+    double z_t;
 };
 
-Matrix4f exponential_coordinates_to_SE3(const Coordinates &);
+Matrix4d exponential_coordinates_to_SE3(const Coordinates &);
 
-Matrix3f exponential_coordinates_to_SO3(float x_r, float y_r, float z_r);
+Matrix3d exponential_coordinates_to_SO3(double x_r, double y_r, double z_r);
 
-Coordinates SE3_to_exponential_coordinates(const Matrix4f &);
+Coordinates SE3_to_exponential_coordinates(const Matrix4d &);
 
-Vector3f SO3_to_exponential_coordinates(const Matrix3f &);
+Vector3d SO3_to_exponential_coordinates(const Matrix3d &);
 
 struct Sn_theta
 {
-    Matrix4f Sn;
-    float theta;
+    Matrix4d Sn;
+    double theta;
 };
 
 struct Bn_theta
 {
-    Matrix4f Bn;
-    float theta;
+    Matrix4d Bn;
+    double theta;
 };
 
-Matrix4f Sn_to_Bn(const Matrix4f& Sn, const Matrix4f& M);
+Matrix4d Sn_to_Bn(const Matrix4d& Sn, const Matrix4d& M);
 
-Coordinates se3_to_exponential_coordinates(const Matrix4f& m);
+Coordinates se3_to_exponential_coordinates(const Matrix4d& m);
 
 #endif

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 	// std::cout<< M_1 << std::endl<<M_1*M<<std::endl<< M*M_1 <<std::endl;
 	// return 0;
 	// Manipulator
-	// Matrix4f A, A2;
+	// Matrix4d A, A2;
 	// Coordinates test;
 	// test = {2, 1, 4, -11, -3, 5};
 	// A = exponential_coordinates_to_SE3(test);
@@ -160,10 +160,10 @@ int main(int argc, char *argv[])
 
 	arm.set_joints(joints);
 	arm.set_segments(segments);
-std::vector<float> par ;
+std::vector<double> par ;
 
 // arm.set_parameters{}
-	return 0;
+	// return 0;
 	// Initialize visualization
 	ArmVis viz;
 	// Arguments are: window title, window width, window height, number of vertices per circle, radius of cylinder
@@ -182,7 +182,7 @@ std::vector<float> par ;
 	ArmVis::vec3 end_rot;
 	Coordinates effector_coordinates;
 
-	Matrix4f offset_frame = arm.effector_frame();
+	Matrix4d offset_frame = arm.effector_frame();
 
 	Coordinates offset;
 
@@ -195,7 +195,7 @@ std::vector<float> par ;
 			  << offset.y_t << std::endl
 			  << offset.z_t << std::endl;
 
-	float scale = 0.1;
+	double scale = 0.1;
 
 
 
@@ -213,14 +213,16 @@ std::vector<float> par ;
 		{std::cout << end_pos.x << ", " << end_pos.y << ", " << end_pos.z << ", " << end_rot.x << ", " << end_rot.y << ", " << end_rot.z << '\n';
 			end_pos = tmp1;
 			end_rot = tmp2;
-			effector_coordinates = {offset.x_r + end_rot.x * scale, offset.y_r + end_rot.y * scale, offset.z_r + end_rot.z * scale, offset.x_t + end_pos.x * scale, offset.y_t + end_pos.y * scale, offset.z_t + end_pos.z * scale};
-			arm.inverse_kinematics(effector_coordinates);
+			effector_coordinates = {offset.x_r + (double)end_rot.x * scale, offset.y_r + (double)end_rot.y * scale, offset.z_r + (double)end_rot.z * scale, offset.x_t + (double)end_pos.x * scale, offset.y_t + (double)end_pos.y * scale, offset.z_t + (double)end_pos.z * scale};
+			Coordinates target_cordinates = {end_rot.x * scale,end_rot.y * scale,end_rot.z * scale,end_pos.x * scale,end_pos.y * scale,end_pos.z * scale};
+			Matrix4d target_change = exponential_coordinates_to_SE3(target_cordinates);
+			arm.inverse_kinematics(target_change*arm.effector_frame());
 			std::vector<float> arm_temp;
 			arm_temp = arm_to_float_vector(arm);
-			std::vector<float> raw_matrix_float = matrix_to_float_vector(exponential_coordinates_to_SE3(effector_coordinates));
+			std::vector<double> raw_matrix_double = matrix_to_double_vector(target_change*arm.effector_frame());
 			for (int j = 0; j < 16; j++)
 			{
-				arm_temp.push_back(raw_matrix_float[j]);
+				arm_temp.push_back((float)raw_matrix_double[j]);
 			}
 			arm_coordinates = arm_temp;
 			
