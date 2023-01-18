@@ -38,21 +38,21 @@ std::vector<float> arm_to_float_vector(const Arm &arm)
             arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
         }
     }
-    raw_matrix_double = matrix_to_double_vector(arm.effector_frame());
-    for (int j = 0; j < 16; j++)
-    {
-        arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
-    }
-    raw_matrix_double = matrix_to_double_vector(arm.Sn_product());
-    for (int j = 0; j < 16; j++)
-    {
-        arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
-    }
-    raw_matrix_double = matrix_to_double_vector(arm.Bn_product());
-    for (int j = 0; j < 16; j++)
-    {
-        arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
-    }
+    // raw_matrix_double = matrix_to_double_vector(arm.effector_frame());
+    // for (int j = 0; j < 16; j++)
+    // {
+    //     arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
+    // }
+    // raw_matrix_double = matrix_to_double_vector(arm.Sn_product());
+    // for (int j = 0; j < 16; j++)
+    // {
+    //     arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
+    // }
+    // raw_matrix_double = matrix_to_double_vector(arm.Bn_product());
+    // for (int j = 0; j < 16; j++)
+    // {
+    //     arm_raw_coordinates.push_back((float)raw_matrix_double[j]);
+    // }
     return arm_raw_coordinates;
 }
 

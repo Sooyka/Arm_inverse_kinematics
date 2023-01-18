@@ -295,7 +295,7 @@ void Arm::inverse_kinematics(const Matrix4d &target_frame)
         // std::cout <<"Jacobian pseudoinverse:"<< std::endl<< Jacobian_pseudoinverse << std::endl << std::endl <<"Jacobian:" << std::endl << Jacobian << std::endl << std::endl << std::endl;
         double diff_norm;
         // diff_norm = parameters_delta_vect.norm();
-        diff_norm = (effector_frame().inverse() * target_frame).norm();
+        diff_norm = (Matrix4d::Identity() - effector_frame().inverse() * target_frame).norm();
         std::cout << diff_norm << std::endl;
         if (diff_norm < epsilon)
         {
@@ -310,6 +310,7 @@ void Arm::inverse_kinematics(const Matrix4d &target_frame)
         set_parameters(parameters);
 
         no_of_steps++;
+        std::cout<< no_of_steps<< std::endl;
     }
 };
 
@@ -346,7 +347,7 @@ std::vector<Sn_theta> Arm::get_Sn_theta() const
     Coordinates coordinates;
     double x_r, y_r, z_r, x_t, y_t, z_t;
     Matrix3d omega;
-    double epsilon = 0.001;
+    double epsilon = 0.00001;
     for (int i = 0; i < no_of_segments; i++)
     {
 

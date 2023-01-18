@@ -1,7 +1,7 @@
 #include "common.h"
 #include "ArmVis.h"
 
-#define EPSILON 0.001
+#define EPSILON 0.00001
 
 Matrix4d exponential_coordinates_to_SE3(const Coordinates &coordinates) // calculates exponent of coordinates interpreted as a matrix from se(3)
 {
@@ -16,7 +16,7 @@ Matrix4d exponential_coordinates_to_SE3(const Coordinates &coordinates) // calcu
     Matrix4d SE3_matrix = Matrix4d::Zero();
 
     double theta_square = x_r * x_r + y_r * y_r + z_r * z_r;
-    double epsilon = 0.001;
+    double epsilon = 0.00001;
     if (theta_square < epsilon)
     {
         SE3_matrix.block(0, 0, 3, 3) = Matrix3d::Identity();
@@ -51,7 +51,7 @@ Matrix4d exponential_coordinates_to_SE3(const Coordinates &coordinates) // calcu
 Matrix3d exponential_coordinates_to_SO3(double x_r, double y_r, double z_r) // calculates exponent of coordinates interpreted as a matrix from so(3)
 {
     Matrix3d SO3_matrix;
-    double epsilon = 0.001;
+    double epsilon = 0.00001;
     double theta_square = x_r * x_r + y_r * y_r + z_r * z_r;
     if (theta_square < epsilon)
     {
@@ -77,7 +77,7 @@ Coordinates SE3_to_exponential_coordinates(const Matrix4d &matrix)
     Matrix3d R = matrix.block(0, 0, 3, 3);
     Vector3d p = matrix.block(0, 3, 3, 1);
     Coordinates coordinates;
-    double epsilon = 0.001;
+    double epsilon = 0.00001;
     Matrix3d diff = R - Matrix3d::Identity();
     Matrix3d omega;
     double theta;
@@ -131,7 +131,7 @@ Vector3d SO3_to_exponential_coordinates(const Matrix3d &R)
     Matrix3d omega;
     Vector3d coordinates;
     Matrix3d diff = R - Matrix3d::Identity();
-    double epsilon = 0.001;
+    double epsilon = 0.00001;
 
     if (diff.norm() < epsilon)
     {
