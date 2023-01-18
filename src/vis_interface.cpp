@@ -35,7 +35,7 @@ std::vector<float> arm_to_float_vector(const Arm &arm)
         raw_matrix_float = matrix_to_float_vector(joint_segment_matrix * segment_scaling_for_drawing(segments[i]) * vis_scaling_matrix);
         for (int j = 0; j < 16; j++)
         {
-            arm_raw_coordinates.push_back(raw_matrix_float[j]);
+            arm_raw_coordinates.push_back((float)raw_matrix_float[j]);
         }
     }
     raw_matrix_float = matrix_to_float_vector(arm.effector_frame());
