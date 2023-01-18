@@ -271,18 +271,18 @@ void Arm::inverse_kinematics(Coordinates coordinates)
     const int max_no_of_steps = 10000;
 
     float epsilon = 0.05;
-
+    current_frame = effector_frame();
+    V_b_coordinates = SE3_to_exponential_coordinates(current_frame.inverse() * target_frame);
+    // transforming to V_b
+    V_b(0, 0) = V_b_coordinates.x_r;
+    V_b(1, 0) = V_b_coordinates.y_r;
+    V_b(2, 0) = V_b_coordinates.z_r;
+    V_b(3, 0) = V_b_coordinates.x_t;
+    V_b(4, 0) = V_b_coordinates.y_t;
+    V_b(5, 0) = V_b_coordinates.z_t;
     while (!precision_achieved && no_of_steps < max_no_of_steps)
     {
-        current_frame = effector_frame();
-        V_b_coordinates = SE3_to_exponential_coordinates(current_frame.inverse() * target_frame);
-        // transforming to V_b
-        V_b(0, 0) = V_b_coordinates.x_r;
-        V_b(1, 0) = V_b_coordinates.y_r;
-        V_b(2, 0) = V_b_coordinates.z_r;
-        V_b(3, 0) = V_b_coordinates.x_t;
-        V_b(4, 0) = V_b_coordinates.y_t;
-        V_b(5, 0) = V_b_coordinates.z_t;
+
         // Building Jacobian
         Jacobian = get_jacobian();
         MatrixXf Jacobian_pseudoinverse;
@@ -290,7 +290,7 @@ void Arm::inverse_kinematics(Coordinates coordinates)
         Jacobian_pseudoinverse = Jacobian.completeOrthogonalDecomposition().pseudoInverse();
         parameters_delta_vect = Jacobian_pseudoinverse * V_b;
 
-        if (parameters_delta_vect.norm() < epsilon)
+        if ((effector_frame().inverse()*target_frame).norm() < epsilon)
         {
             precision_achieved = true;
         }
@@ -477,7 +477,7 @@ Matrix<float, 6, Dynamic> Arm::get_jacobian() const
             B_j_coordinates_m.x_t = -B_i(0, 3) * theta_j;
             B_j_coordinates_m.y_t = -B_i(1, 3) * theta_j;
             B_j_coordinates_m.z_t = -B_i(2, 3) * theta_j;
-            B_i = exponential_coordinates_to_SE3(B_j_coordinates_m) * B_i*exponential_coordinates_to_SE3(B_j_coordinates);
+            B_i = exponential_coordinates_to_SE3(B_j_coordinates_m) * B_i * exponential_coordinates_to_SE3(B_j_coordinates);
         }
 
         Jacobian_column(0) = B_i(2, 1);
