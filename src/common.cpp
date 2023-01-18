@@ -38,7 +38,7 @@ Matrix4f exponential_coordinates_to_SE3(const Coordinates &coordinates) // calcu
         z_r, 0, -x_r,
         -y_r, x_r, 0;
     Matrix3f Rodrigues_matrix;
-    Rodrigues_matrix = (Matrix3f::Identity() * theta + (1 - cos(theta)) * omega + (theta + sin(theta)) * omega * omega);
+    Rodrigues_matrix = (Matrix3f::Identity() * theta + (1 - cos(theta)) * omega + (theta - sin(theta)) * omega * omega);
     v = Rodrigues_matrix * translation_coordinates;
     SE3_matrix.block(0, 3, 3, 1) << v;
     SE3_matrix(3, 3) = 1;
