@@ -265,24 +265,25 @@ void Arm::inverse_kinematics(Coordinates coordinates)
     parameters_delta_vect.resize(no_of_DoF, 1);
     MatrixXf Jacobian;
     Jacobian.resize(6, no_of_DoF);
-
     parameters = get_parameters();
     int no_of_steps = 0;
-    const int max_no_of_steps = 10000;
+    const int max_no_of_steps = 10;
 
     float epsilon = 0.05;
-
+    current_frame = effector_frame();
+    Matrix4f Identityhmm = current_frame.inverse() * target_frame;
+    V_b_coordinates = SE3_to_exponential_coordinates(current_frame.inverse() * target_frame);
+    V_b(0, 0) = V_b_coordinates.x_r;
+    V_b(1, 0) = V_b_coordinates.y_r;
+    V_b(2, 0) = V_b_coordinates.z_r;
+    V_b(3, 0) = V_b_coordinates.x_t;
+    V_b(4, 0) = V_b_coordinates.y_t;
+    V_b(5, 0) = V_b_coordinates.z_t;
     while (!precision_achieved && no_of_steps < max_no_of_steps)
     {
-        current_frame = effector_frame();
-        V_b_coordinates = SE3_to_exponential_coordinates(current_frame.inverse() * target_frame);
+
         // transforming to V_b
-        V_b(0, 0) = V_b_coordinates.x_r;
-        V_b(1, 0) = V_b_coordinates.y_r;
-        V_b(2, 0) = V_b_coordinates.z_r;
-        V_b(3, 0) = V_b_coordinates.x_t;
-        V_b(4, 0) = V_b_coordinates.y_t;
-        V_b(5, 0) = V_b_coordinates.z_t;
+
         // Building Jacobian
         Jacobian = get_jacobian();
         MatrixXf Jacobian_pseudoinverse;
@@ -290,14 +291,18 @@ void Arm::inverse_kinematics(Coordinates coordinates)
         Jacobian_pseudoinverse = Jacobian.completeOrthogonalDecomposition().pseudoInverse();
         parameters_delta_vect = Jacobian_pseudoinverse * V_b;
 
-        if (parameters_delta_vect.norm() < epsilon)
+        // std::cout <<"Jacobian pseudoinverse:"<< std::endl<< Jacobian_pseudoinverse << std::endl << std::endl <<"Jacobian:" << std::endl << Jacobian << std::endl << std::endl << std::endl;
+        float diff_norm;
+        diff_norm = parameters_delta_vect.norm();
+        std::cout << diff_norm << std::endl;
+        if (diff_norm < epsilon)
         {
             precision_achieved = true;
         }
 
         for (int i = 0; i < no_of_DoF; i++)
         {
-            parameters[i] += parameters_delta_vect(i, 0);
+            parameters[i] += parameters_delta_vect(i, 0) ;
         }
 
         set_parameters(parameters);
@@ -333,15 +338,16 @@ std::vector<Sn_theta> Arm::get_Sn_theta() const
     joints = get_joints();
     JointType joint_type;
 
-    Sn_theta_i.Sn = Sn;
-    Sn_theta_i.theta = theta;
-    Sn_theta_vec.push_back(Sn_theta_i);
+    // Sn_theta_i.Sn = Sn;
+    // Sn_theta_i.theta = theta;
+    // Sn_theta_vec.push_back(Sn_theta_i);
     Coordinates coordinates;
     float x_r, y_r, z_r, x_t, y_t, z_t;
     Matrix3f omega;
-    float epsilon = 0.0000001;
+    float epsilon = 0.001;
     for (int i = 0; i < no_of_segments; i++)
     {
+
         coordinates = joints[i].get_coordinates();
         joint_type = joints[i].get_type();
         x_r = coordinates.x_r;
@@ -364,18 +370,48 @@ std::vector<Sn_theta> Arm::get_Sn_theta() const
                 z_t /= theta;
                 Sn.block(0, 3, 3, 1) << x_t, y_t, z_t;
             }
+            x_r = 0;
+            y_r = 0;
+            z_r = 0;
+            switch (joint_type)
+            {
+            case Revolut_pitch:
+                x_r = 1;
+                break;
+            case Revolut_yawn:
+                z_r = 1;
+                break;
+            case Revolut_roll:
+                y_r = 1;
+                break;
+            default:
+                break;
+            }
+            omega << 0, -z_r, y_r,
+                z_r, 0, -x_r,
+                -y_r, x_r, 0;
+
+            Sn.block(0, 0, 3, 3) = omega;
             Sn_theta_i.Sn = Sn;
             Sn_theta_i.theta = theta;
             Sn_theta_vec.push_back(Sn_theta_i);
+            // std::cout << joint_type << std::endl
+            //           << "Sn:" << std::endl
+            //           << Sn << std::endl
+            //           << std::endl
+            //           << "theta:" << theta << std::endl
+            //           << std::endl;
             continue;
         }
         theta = sqrt(theta_square);
         x_r /= theta;
         y_r /= theta;
         z_r /= theta;
-        if (joint_type == Spherical)
+        Vector3f offset;
+        if (joint_type == Spherical) // here the velocity is calculated wrong
         {
             std::vector<Matrix3f> omega_3;
+            offset << 0, -length_along_segments[i], 0;
             omega << 0, 0, 0,
                 0, 0, -x_r,
                 0, x_r, 0;
@@ -393,8 +429,9 @@ std::vector<Sn_theta> Arm::get_Sn_theta() const
             // not shure about theta here
             for (int j = 0; j < 3; j++)
             {
+
                 Sn.block(0, 0, 3, 3) = omega_3[j];
-                Sn.block(0, 3, 3, 1) << 0, -length_along_segments[i], 0;
+                Sn.block(0, 3, 3, 1) << omega_3[i] * offset;
                 Sn_theta_i.Sn = Sn;
                 Sn_theta_i.theta = theta;
                 Sn_theta_vec.push_back(Sn_theta_i);
@@ -404,12 +441,23 @@ std::vector<Sn_theta> Arm::get_Sn_theta() const
         omega << 0, -z_r, y_r,
             z_r, 0, -x_r,
             -y_r, x_r, 0;
-
+        Sn = Matrix4f::Zero();
         Sn.block(0, 0, 3, 3) = omega;
-        Sn.block(0, 3, 3, 1) << 0, -length_along_segments[i], 0;
+
+        offset << 0, -length_along_segments[i], 0;
+
+        Sn.block(0, 3, 3, 1) << omega * offset;
+
         Sn_theta_i.Sn = Sn;
         Sn_theta_i.theta = theta;
         Sn_theta_vec.push_back(Sn_theta_i);
+        // spdlog::info("Sn: \n {},\n\n theta:\n {}", Sn,theta);
+        // std::cout << joint_type << std::endl
+        //           << "Sn:" << std::endl
+        //           << Sn << std::endl
+        //           << std::endl
+        //           << "theta:" << theta << std::endl
+        //           << std::endl;
     }
 
     return Sn_theta_vec;
@@ -430,6 +478,7 @@ Matrix<float, 6, Dynamic> Arm::get_jacobian() const
     }
     M_temp(1, 3) = length_summation;
     const Matrix4f M = M_temp;
+
     Matrix<float, 6, Dynamic> Jacobian;
     int no_of_DoF = Arm::no_of_DoF();
     Jacobian.resize(6, no_of_DoF);
@@ -447,6 +496,14 @@ Matrix<float, 6, Dynamic> Arm::get_jacobian() const
         Bn_theta_i.theta = Sn_theta_i.theta;
 
         Bn_theta_vec.push_back(Bn_theta_i);
+        // std::cout << "Bn:" << std::endl
+        //           << Bn_theta_i.Bn << std::endl
+        //           << std::endl
+        //           << "theta:" << Bn_theta_i.theta << std::endl
+        //           << std::endl
+        //           << "M:" << std::endl
+        //           << M << std::endl
+        //           << std::endl;
     }
 
     Matrix<float, 6, 1> Jacobian_column = Matrix<float, 6, 1>::Zero();
@@ -464,20 +521,10 @@ Matrix<float, 6, Dynamic> Arm::get_jacobian() const
         {
             B_j = Bn_theta_vec[j].Bn;
             theta_j = Bn_theta_vec[j].theta;
-            B_j_coordinates.x_r = B_i(2, 1) * theta_j;
-            B_j_coordinates.y_r = B_i(0, 2) * theta_j;
-            B_j_coordinates.z_r = B_i(1, 0) * theta_j;
-            B_j_coordinates.x_t = B_i(0, 3) * theta_j;
-            B_j_coordinates.y_t = B_i(1, 3) * theta_j;
-            B_j_coordinates.z_t = B_i(2, 3) * theta_j;
+            B_j_coordinates = se3_to_exponential_coordinates(B_j * theta_j);
+            B_j_coordinates_m = se3_to_exponential_coordinates(-B_j * theta_j);
 
-            B_j_coordinates_m.x_r = -B_i(2, 1) * theta_j;
-            B_j_coordinates_m.y_r = -B_i(0, 2) * theta_j;
-            B_j_coordinates_m.z_r = -B_i(1, 0) * theta_j;
-            B_j_coordinates_m.x_t = -B_i(0, 3) * theta_j;
-            B_j_coordinates_m.y_t = -B_i(1, 3) * theta_j;
-            B_j_coordinates_m.z_t = -B_i(2, 3) * theta_j;
-            B_i = exponential_coordinates_to_SE3(B_j_coordinates_m) * B_i*exponential_coordinates_to_SE3(B_j_coordinates);
+            B_i = exponential_coordinates_to_SE3(B_j_coordinates_m) * B_i * exponential_coordinates_to_SE3(B_j_coordinates);
         }
 
         Jacobian_column(0) = B_i(2, 1);
@@ -492,3 +539,120 @@ Matrix<float, 6, Dynamic> Arm::get_jacobian() const
 
     return Jacobian;
 };
+
+Matrix4f Arm::Sn_product() const
+{
+    Matrix4f M_temp = Matrix4f::Identity();
+    Segment segment;
+    std::vector<Segment> segments;
+    segments = get_segments();
+    int no_of_segments = segments.size();
+    float length_summation = 0;
+    for (int i = 0; i < no_of_segments; i++)
+    {
+        segment = segments[i];
+        length_summation += segment.get_length();
+    }
+    M_temp(1, 3) = length_summation;
+    const Matrix4f M = M_temp;
+
+    int no_of_DoF = Arm::no_of_DoF();
+
+    std::vector<Sn_theta> Sn_theta_vec = get_Sn_theta();
+    Sn_theta Sn_theta_i;
+    Matrix4f Sn;
+    Matrix4f Sn_product = Matrix4f::Identity();
+    float theta;
+    for (int i = 0; i < no_of_DoF; i++)
+    {
+        Sn_theta_i = Sn_theta_vec[i];
+        Sn = Sn_theta_i.Sn;
+        theta = Sn_theta_i.theta;
+        Sn_product = Sn_product * exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Sn_theta_vec[i].Sn * Sn_theta_vec[i].theta));
+    }
+    Sn_product = Sn_product * M;
+    // std::cout<< "Sn prod"<<std::endl;
+    // std::cout << "Sn:" << std::endl << Sn<<std::endl<<std::endl<< "theta:" << theta<<std::endl<<std::endl<<"M:"<<std::endl<<M<<std::endl<<std::endl;
+    // Matrix4f prod1 = exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Sn * theta))*M;
+    // Matrix4f prod2 = M*exponential_coordinates_to_SE3(se3_to_exponential_coordinates(M.inverse()*Sn*M * theta));
+    // Matrix4f prod3 = M*exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Sn_to_Bn(Sn, M) * theta));
+    // std::cout << "prod1:" << std::endl << prod1<< std::endl << std::endl <<"prod2:" << std::endl << prod2 << std::endl << std::endl << std::endl;
+    // std::cout << "prod3:" << std::endl << prod3<< std::endl << std::endl;
+    // std::cout << "sn_exp:" << std::endl
+    //           << exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Sn_theta_vec[0].Sn * Sn_theta_vec[0].theta)) << std::endl;
+    // std::cout << "S_n_product:" << std::endl
+    //           << Sn_product << std::endl
+    //           << std::endl
+    //           << "Effector frame:" << std::endl
+    //           << effector_frame() << std::endl
+    //           << std::endl
+    //           << std::endl;
+
+    return Sn_product;
+}
+Matrix4f Arm::Bn_product() const
+{
+    Matrix4f M_temp = Matrix4f::Identity();
+    Segment segment;
+    std::vector<Segment> segments;
+    segments = get_segments();
+    int no_of_segments = segments.size();
+    float length_summation = 0;
+    for (int i = 0; i < no_of_segments; i++)
+    {
+        segment = segments[i];
+        length_summation += segment.get_length();
+    }
+    M_temp(1, 3) = length_summation;
+    const Matrix4f M = M_temp;
+
+    int no_of_DoF = Arm::no_of_DoF();
+
+    std::vector<Sn_theta> Sn_theta_vec = get_Sn_theta();
+    Sn_theta Sn_theta_i;
+
+    std::vector<Bn_theta> Bn_theta_vec;
+    Bn_theta Bn_theta_i;
+    Matrix4f Sn, Bn;
+    float theta;
+    for (int i = 0; i < no_of_DoF; i++)
+    {
+        Sn_theta_i = Sn_theta_vec[i];
+
+        Sn = Sn_theta_i.Sn;
+        theta = Sn_theta_i.theta;
+        Bn_theta_i.Bn = Sn_to_Bn(Sn, M);
+        Bn = Bn_theta_i.Bn;
+        // std::cout <<"M inverse:"<<std::endl<< M.inverse()<<std::endl<<"M:"<<std::endl<< M<<std::endl<<"Sn:"<<std::endl<< Sn<<std::endl<<"Bn:"<<std::endl<< Bn<<std::endl;
+        Bn_theta_i.theta = Sn_theta_i.theta;
+
+        Bn_theta_vec.push_back(Bn_theta_i);
+        // std::cout << i <<std::endl;
+    }
+
+    Matrix4f Bn_product = M;
+    for (int i = 0; i < no_of_DoF; i++)
+    {
+        Bn_product = Bn_product * exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Bn_theta_vec[i].Bn * Bn_theta_vec[i].theta));
+        // std::cout << i <<std::endl;
+    }
+    // std::cout<< "Bn prod"<<std::endl;
+    // std::cout << "Sn:" << std::endl << Sn<<std::endl<<std::endl<< "theta:" << theta<<std::endl<<std::endl<<"M:"<<std::endl<<M<<std::endl<<std::endl;
+    // Matrix4f prod1 = exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Sn * theta))*M;
+    // Matrix4f prod2 = M*exponential_coordinates_to_SE3(se3_to_exponential_coordinates(M.inverse()*Sn*M * theta));
+    // Matrix4f prod3 = M*exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Sn_to_Bn(Sn, M) * theta));
+    // std::cout << "prod1:" << std::endl << prod1<< std::endl << std::endl <<"prod2:" << std::endl << prod2 << std::endl << std::endl << std::endl;
+    // std::cout << "prod3:" << std::endl << prod3<< std::endl << std::endl;
+    // std::cout<<"bn_exp:"<<std::endl<< exponential_coordinates_to_SE3(se3_to_exponential_coordinates(Bn_theta_vec[0].Bn * Bn_theta_vec[0].theta)) <<std::endl;
+    // std::cout<<"M*M.inverse()*Sn*M"<<std::endl<<M*M.inverse()*Sn*M<<std::endl;
+    // std::cout<<"M.inverse()*Sn*M"<<std::endl<<M.inverse()*Sn*M<<std::endl;
+    // std::cout<<"M.inverse()*Sn*M"<<std::endl<<M.inverse()*Sn*M<<std::endl;
+    // std::cout << "Effector frame:" << std::endl
+    //           << effector_frame() << std::endl
+    //           << std::endl;
+    // std::cout<< "B_n product:" << std::endl
+    // << Bn_product << std::endl
+    // << std::endl
+    // << std::endl;
+    return Bn_product;
+}

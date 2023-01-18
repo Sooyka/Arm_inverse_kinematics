@@ -59,6 +59,8 @@ public:
     int no_of_DoF() const;
     Matrix<float, 6, Dynamic> get_jacobian()const;
     
+    Matrix4f Sn_product()const;
+    Matrix4f Bn_product()const;
 };
 
 

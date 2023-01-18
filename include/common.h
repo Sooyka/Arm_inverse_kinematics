@@ -5,6 +5,12 @@
 #include <eigen3/Eigen/Core>
 #include <Eigen/Dense>
 #include <vector>
+// #define _GNU_SOURCE 
+#include <fenv.h>
+#include "spdlog/spdlog.h"
+#include<unistd.h>  
+// int feenableexcept(FE_INVALID | FE_OVERFLOW);
+// int feenableexcept(FE_ALL_EXCEPT & ~FE_INEXACT);
 // #include <boost/range/combine.hpp>
 // #include "boost/tuple/tuple_io.hpp"
 // #include <tuple>
@@ -42,5 +48,7 @@ struct Bn_theta
 };
 
 Matrix4f Sn_to_Bn(const Matrix4f& Sn, const Matrix4f& M);
+
+Coordinates se3_to_exponential_coordinates(const Matrix4f& m);
 
 #endif

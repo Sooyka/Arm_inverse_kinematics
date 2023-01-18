@@ -1,6 +1,8 @@
 #include "common.h"
 #include "ArmVis.h"
 
+#define EPSILON 0.001
+
 Matrix4f exponential_coordinates_to_SE3(const Coordinates &coordinates) // calculates exponent of coordinates interpreted as a matrix from se(3)
 {
     float x_r, y_r, z_r, x_t, y_t, z_t;
@@ -14,7 +16,7 @@ Matrix4f exponential_coordinates_to_SE3(const Coordinates &coordinates) // calcu
     Matrix4f SE3_matrix = Matrix4f::Zero();
 
     float theta_square = x_r * x_r + y_r * y_r + z_r * z_r;
-    float epsilon = 0.0000001;
+    float epsilon = 0.001;
     if (theta_square < epsilon)
     {
         SE3_matrix.block(0, 0, 3, 3) = Matrix3f::Identity();
@@ -38,7 +40,7 @@ Matrix4f exponential_coordinates_to_SE3(const Coordinates &coordinates) // calcu
         z_r, 0, -x_r,
         -y_r, x_r, 0;
     Matrix3f Rodrigues_matrix;
-    Rodrigues_matrix = (Matrix3f::Identity() * theta + (1 - cos(theta)) * omega + (theta + sin(theta)) * omega * omega);
+    Rodrigues_matrix = (Matrix3f::Identity() * theta + (1 - cos(theta)) * omega + (theta - sin(theta)) * omega * omega);
     v = Rodrigues_matrix * translation_coordinates;
     SE3_matrix.block(0, 3, 3, 1) << v;
     SE3_matrix(3, 3) = 1;
@@ -49,7 +51,14 @@ Matrix4f exponential_coordinates_to_SE3(const Coordinates &coordinates) // calcu
 Matrix3f exponential_coordinates_to_SO3(float x_r, float y_r, float z_r) // calculates exponent of coordinates interpreted as a matrix from so(3)
 {
     Matrix3f SO3_matrix;
-    float theta = sqrt(x_r * x_r + y_r * y_r + z_r * z_r);
+    float epsilon = 0.001;
+    float theta_square = x_r * x_r + y_r * y_r + z_r * z_r;
+    if (theta_square < epsilon)
+    {
+
+        return Matrix3f::Identity();
+    }
+    const float theta = sqrt(theta_square);
     x_r /= theta;
     y_r /= theta;
     z_r /= theta;
@@ -68,7 +77,7 @@ Coordinates SE3_to_exponential_coordinates(const Matrix4f &matrix)
     Matrix3f R = matrix.block(0, 0, 3, 3);
     Vector3f p = matrix.block(0, 3, 3, 1);
     Coordinates coordinates;
-    float epsilon = 0.0000001;
+    float epsilon = 0.001;
     Matrix3f diff = R - Matrix3f::Identity();
     Matrix3f omega;
     float theta;
@@ -118,40 +127,70 @@ Coordinates SE3_to_exponential_coordinates(const Matrix4f &matrix)
 Vector3f SO3_to_exponential_coordinates(const Matrix3f &R)
 {
     float x_r, y_r, z_r;
-    float theta;
-    float trace = R.trace();
+    const float trace = R.trace();
     Matrix3f omega;
     Vector3f coordinates;
     Matrix3f diff = R - Matrix3f::Identity();
-    float epsilon = 0.0000001;
+    float epsilon = 0.001;
+
     if (diff.norm() < epsilon)
     {
-        coordinates(0)= 0;
+        coordinates(0) = 0;
         coordinates(1) = 0;
         coordinates(2) = 0;
         return coordinates;
     }
 
     float trace_diff = trace + 1;
-    float r12, r22, r32;
+    float r[3];
     Vector3f r_pi;
-    if(trace_diff < epsilon)
-    {   
-        r12 = R(0,1);
-        r22 = R(1,1);
-        r32 = R(2,1);
-        r_pi << r12, 1+r22, r32;
-        coordinates = M_PI*1/(2*sqrt(1+r22))*r_pi;
+    if (abs(trace_diff) < epsilon || abs(0.5 * (trace - 1)) > 1)
+    {
+        int i = 0;
+        if (R(1, 1) >= R(i, i))
+        {   
+            i = 1;
+            if (R(2, 2) > R(i, i))
+            {
+                i = 2;
+            }
+        }
+
+        r[0] = R(0, i);
+        r[1] = R(1, i);
+        r[2] = R(2, i);
+        r[i]++;
+        r_pi << r[0], r[1], r[2];
+        coordinates = M_PI * 1 / sqrt(2 * (1 + R(i,i))) * r_pi;
         return coordinates;
     }
 
-    theta = acos(0.5*(trace-1));
-    
-    omega = 1/(2*sin(theta))*(R-R.transpose());
+    const float theta = acos(0.5 * (trace - 1));
+    if (abs(sin(theta)) < epsilon)
+    {
+        int i = 0;
+        if (R(1, 1) >= R(i, i))
+        {
+            i = 1;
+            if (R(2, 2) > R(i, i))
+            {
+                i = 2;
+            }
+        }
 
-    coordinates(0) = omega(2,1);
-    coordinates(1) = omega(0,2);
-    coordinates(2) = omega(1,0);
+        r[0] = R(0, i);
+        r[1] = R(1, i);
+        r[2] = R(2, i);
+        r[i]++;
+        r_pi << r[0], r[1], r[2];
+        coordinates = M_PI * 1 / sqrt(2 * (1 + R(i,i))) * r_pi;
+        return coordinates;
+    }
+    omega = 1 / (2 * sin(theta)) * (R - R.transpose());
+
+    coordinates(0) = omega(2, 1);
+    coordinates(1) = omega(0, 2);
+    coordinates(2) = omega(1, 0);
 
     coordinates *= theta;
 
@@ -160,5 +199,20 @@ Vector3f SO3_to_exponential_coordinates(const Matrix3f &R)
 
 Matrix4f Sn_to_Bn(const Matrix4f &Sn, const Matrix4f &M)
 {
-    return M.inverse()*Sn*M;
+    return M.inverse() * Sn * M;
+}
+
+Coordinates se3_to_exponential_coordinates(const Matrix4f &m)
+{
+
+    Coordinates coordinates;
+
+    coordinates.x_r = m(2, 1);
+    coordinates.y_r = m(0, 2);
+    coordinates.z_r = m(1, 0);
+    coordinates.x_t = m(0, 3);
+    coordinates.y_t = m(1, 3);
+    coordinates.z_t = m(2, 3);
+
+    return coordinates;
 }

@@ -38,11 +38,21 @@ std::vector<float> arm_to_float_vector(const Arm &arm)
             arm_raw_coordinates.push_back(raw_matrix_float[j]);
         }
     }
-    // raw_matrix_float = matrix_to_float_vector(arm.effector_frame());
-    // for (int j = 0; j < 16; j++)
-    // {
-    //     arm_raw_coordinates.push_back(raw_matrix_float[j]);
-    // }
+    raw_matrix_float = matrix_to_float_vector(arm.effector_frame());
+    for (int j = 0; j < 16; j++)
+    {
+        arm_raw_coordinates.push_back(raw_matrix_float[j]);
+    }
+    raw_matrix_float = matrix_to_float_vector(arm.Sn_product());
+    for (int j = 0; j < 16; j++)
+    {
+        arm_raw_coordinates.push_back(raw_matrix_float[j]);
+    }
+    raw_matrix_float = matrix_to_float_vector(arm.Bn_product());
+    for (int j = 0; j < 16; j++)
+    {
+        arm_raw_coordinates.push_back(raw_matrix_float[j]);
+    }
     return arm_raw_coordinates;
 }
 
